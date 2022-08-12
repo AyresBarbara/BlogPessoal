@@ -3,8 +3,11 @@ package org.generation.blogPessoal.Controller;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import org.generation.blogPessoal.Model.Postagem;
 import org.generation.blogPessoal.repository.PostagemRepository;
+import org.generation.blogPessoal.repository.TemaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +30,9 @@ public class PostagemController {
 
 	@Autowired
 	private PostagemRepository repository;
+	
+	@Autowired
+	private TemaRepository temaRepository;
 
 	@GetMapping
 	public ResponseEntity<List<Postagem>> GetAll(){
@@ -41,16 +47,27 @@ public class PostagemController {
 	}
 	//ATRIBUTO / ENDPOINT
 	@GetMapping ("/titulo/{titulo}")//PathVariable pega um caminho dentro da URL
-	public ResponseEntity <List<Postagem>> GetByTitulo(@PathVariable String titulo){ // ResponseEntity é uma lista
+	public ResponseEntity <List<Postagem>> GetByTitulo( @PathVariable String titulo){ // ResponseEntity é uma lista
 		return ResponseEntity.ok(repository.findAllByTituloContainingIgnoreCase(titulo));
 	}
 	@PostMapping
 	public ResponseEntity <Postagem> post (@RequestBody Postagem postagem){ //RequestBody pega o que tem no corpo da requisição
-		return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(postagem));	
+		if(temaRepository.existsById (postagem.getTema().getId()))
+		return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(postagem));
+		
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 	}
 	@PutMapping
-	public ResponseEntity <Postagem> put (@RequestBody Postagem postagem){ 
-		return ResponseEntity.status(HttpStatus.OK).body(repository.save(postagem));
+	public ResponseEntity <Postagem> put (@Valid @RequestBody Postagem postagem){ 
+		if(repository.existsById(postagem.getId())) {
+			
+			
+			if (temaRepository.existsById(postagem.getTema().getId()))
+		return ResponseEntity.status(HttpStatus.OK)
+				.body(repository.save(postagem));
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 	}
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@DeleteMapping ("/{id}")
