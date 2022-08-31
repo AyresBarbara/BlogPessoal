@@ -77,7 +77,7 @@ public class UsuarioControllerTest {
 		
 		ResponseEntity<UsuarioModel> corpoResposta = testRestTemplate
 				.withBasicAuth("root@root.com", "rootroot" )
-				.exchange("/usuario/cadastrar",HttpMethod.PUT,corpoRequisicao, UsuarioModel.class);
+				.exchange("/usuario/atualizar",HttpMethod.PUT,corpoRequisicao, UsuarioModel.class);
 		
 		assertEquals(HttpStatus.OK, corpoResposta.getStatusCode());
 		assertEquals(corpoRequisicao.getBody().getNome(), corpoResposta.getBody().getNome());
